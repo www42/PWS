@@ -28,6 +28,9 @@ $DefaultGw      = "10.70.0.1"
 $DnsServer      = "10.70.0.10"
 $AdDomain       = "Adatum.com"
 
+$Ws2016Iso      = "C:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
+$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
+
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 
 $LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
@@ -77,9 +80,6 @@ Write-Host -ForegroundColor Cyan "Join Domain.................................. 
 #endregion
 
 #region Create Nano Workbench
-
-$Ws2016Iso = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
-$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
 
 $DvdLw = Get-VMDvdDrive -VMName $VmName
 if (-not $DvdLw) {Add-VMDvdDrive -VMName $VmName}
