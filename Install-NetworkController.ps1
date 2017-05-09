@@ -155,19 +155,23 @@ Debug-ServiceFabricNodeStatus -ServiceTypeName "VSwitchService"
 # -----------------------
 
 # The first command creates a CredentialProperties object, and then stores it in the $CredentialProperties variable.
+# $CredentialProperties = [Microsoft.Windows.NetworkController.CredentialProperties]@{Type="UsernamePassword";UserName="admin";Value="password"}
 $CredentialProperties = [Microsoft.Windows.NetworkController.CredentialProperties]@{Type="UsernamePassword";UserName="admin";Value="password"}
 
 # The second command creates a credential that has the properties in $CredentialProperties by using the New-NetworkControllerCredential cmdlet.
-New-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://restserver" -Properties $CredentialProperties
+# New-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://restserver" -Properties $CredentialProperties
+New-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://svr1.adatum.com" -Properties $CredentialProperties
 
 # The third command gets the credential by using the Get-NetworkControllerCredential cmdlet, and then stores it in the $Credential variable.
-$Credential = Get-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://restserver"
+# $Credential = Get-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://restserver"
+$Credential = Get-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://svr1.adatum.com"
 
 # The fourth command creates a ServerProperties object by using the New-Object cmdlet. The command stores the object in the $ServerProperties variable.
 $ServerProperties = New-Object Microsoft.Windows.NetworkController.ServerProperties
 
 # The next five commands assign values to properties of $ServerProperties.
-$ServerProperties.Connections = @([Microsoft.Windows.NetworkController.Connection]@{ManagementAddresses=@("192.168.0.12");Credential=$Credential})
+# $ServerProperties.Connections = @([Microsoft.Windows.NetworkController.Connection]@{ManagementAddresses=@("192.168.0.12");Credential=$Credential})
+$ServerProperties.Connections = @([Microsoft.Windows.NetworkController.Connection]@{ManagementAddresses=@("10.70.0.21");Credential=$Credential})
 $ServerProperties.RackSlot = "1"
 $ServerProperties.OS = "Windows Server 2016"
 $ServerProperties.Vendor = "Dell"
@@ -175,7 +179,8 @@ $ServerProperties.Model = "PowerEdge R730"
 
 # The final command adds a server to the Network Controller that has the resource ID Server01. The command identifies the Network Controller by URI.
 # The command specifies the properties of the server by using $ServerProperties.
-New-NetworkControllerServer -ConnectionUri "https://networkcontroller" -ResourceId "Server01" -Properties $ServerProperties
+# New-NetworkControllerServer -ConnectionUri "https://networkcontroller" -ResourceId "Server01" -Properties $ServerProperties
+New-NetworkControllerServer -ConnectionUri "https://svr1.adatum.com" -ResourceId "Server01" -Properties $ServerProperties
 
 #endregion
 
