@@ -98,13 +98,13 @@ Invoke-Command -VMName $ServerVmName -Credential $DomCred {
             -Node $node `
             -ClusterAuthentication Kerberos `
             -ManagementSecurityGroup $using:ManagementSecurityGroup `
-            -CredentialEncryptionCertificate $Certificate
+            -CredentialEncryptionCertificate $Certificate | Out-Null
 
     Install-NetworkController `
             -Node $node `
             -ClientAuthentication Kerberos `
             -ClientSecurityGroup $using:ClientSecurityGroup `
-            -ServerCertificate $Certificate
+            -ServerCertificate $Certificate | Out-Null
 #            -RestIpAddress $RestIpAddress 
 }
 
@@ -124,6 +124,9 @@ Get-NetworkControllerCredential -ConnectionUri https://svr1.adatum.com -Resource
 #endregion
 
 #region temp useful command to debug
+
+$SVR1 = New-PSSession -VMName $ServerVmName -Credential $DomCred
+Enter-PSSession -Session $SVR1
 
 Get-NetworkController
 Get-NetworkControllerDeploymentInfo -NetworkController SVR1
