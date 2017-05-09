@@ -6,9 +6,34 @@ $Lab = "PWS"
 $ServerComputerName = "SVR1"
 $DcComputerName     = "DC1"
 
+
+# The ManagementSecurityGroup parameter specifies the name of the security group that contains users 
+# that are allowed to run the management cmdlets from a remote computer. This is only applicable if 
+# ClusterAuthentication is Kerberos. You must specify a domain security group and not a security group
+# on the local computer.
+$ManagementSecurityGroup     = "Adatum\Network Controller Admins"
+$ManagementSecurityGroupName =        "Network Controller Admins"
+
+
+# The ClientSecurityGroup parameter specifies the name of the Active Directory security group
+# whose members are Network Controller clients. This parameter is required only if you use Kerberos
+# authentication for ClientAuthentication. The security group must contain the accounts from which
+# the REST APIs are accessed, and you must create the security group and add members before running 
+# the "Install-NetworkController" command.
+$ClientSecurityGroup     = "Adatum\Network Controller Ops"
+$ClientSecurityGroupName =        "Network Controller Ops"
+
+# You do not need to specify a value for RESTIPAddress with a single node deployment of Network Controller.
+# For multiple-node deployments, the RESTIPAddress parameter specifies the IP address of the REST endpoint
+#in CIDR notation. For example, 192.168.1.10/24. The Subject Name value of ServerCertificate must resolve
+# to the value of the RESTIPAddress parameter. This parameter must be specified for all multiple-node
+# Network Controller deployments when all of the nodes are on the same subnet. If nodes are on different subnets,
+# you must use the RestName parameter instead of using RESTIPAddress.
+#$RestIpAddress = "10.70.0.99/16"
+
+
 $ServerVmName = ConvertTo-VmName -VmComputerName $ServerComputerName
 $DcVmName     = ConvertTo-VmName -VmComputerName $DcComputerName
-
 $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
 
 Write-Host -ForegroundColor Cyan "Variables.................................... done."
@@ -19,14 +44,14 @@ Write-Host -ForegroundColor Cyan "Variables.................................... 
 
 Invoke-Command -VMName $DcVmName -Credential $DomCred {
 
-    New-ADGroup -Name "Network Controller Admins" `
-                -SamAccountName "Network Controller Admins" `
+    New-ADGroup -Name $using:ManagementSecurityGroupName `
+                -SamAccountName $using:ManagementSecurityGroupName `
                 -GroupCategory "Security" `
                 -GroupScope "Global" `
                 -Path "CN=Users,DC=Adatum,DC=com"
 
-    New-ADGroup -Name "Network Controller Ops" `
-                -SamAccountName "Network Controller Ops" `
+    New-ADGroup -Name $using:ClientSecurityGroupName `
+                -SamAccountName $using:ClientSecurityGroupName `
                 -GroupCategory "Security" `
                 -GroupScope "Global" `
                 -Path "CN=Users,DC=Adatum,DC=com"
@@ -41,47 +66,113 @@ Write-Host -ForegroundColor Cyan "Create AD groups............................. 
 
 #endregion
 
-#region Deploy Network Controller
+#region Install role NetworkController
 
 Invoke-Command -VMName $ServerVmName -Credential $DomCred {
     
-    Install-WindowsFeature -Name "NetworkController" -IncludeManagementTools
+    Install-WindowsFeature -Name "NetworkController" -IncludeManagementTools | Out-Null
     Restart-Computer
 }
 
 Start-Sleep -Seconds 60
 
-#---------------------------------------
+Write-Host -ForegroundColor Cyan "Install role NetworkController............... done."
+
+#endregion
+
+#region Deploy NetworkController
 
 Invoke-Command -VMName $ServerVmName -Credential $DomCred {
 
     Get-Certificate -Template "Machine" -CertStoreLocation "Cert:\LocalMachine\My"
-    $Certificate = Get-ChildItem Cert:\LocalMachine\My | where {$_.Subject -imatch "SVR1" }
+    $Certificate = Get-ChildItem Cert:\LocalMachine\My | where {$_.Subject -imatch $using:ServerComputerName }
 
     $node = New-NetworkControllerNodeObject `
             -Name          "Node1" `
             -Server        "SVR1.adatum.com" `
             -FaultDomain   "fd:/rack1/host1" `
-            -RestInterface "Ethernet"
+            -RestInterface "Ethernet" `
+            -NodeCertificate $Certificate
     
     Install-NetworkControllerCluster `
             -Node $node `
             -ClusterAuthentication Kerberos `
-            -ManagementSecurityGroup "Adatum\Network Controller Admins" `
+            -ManagementSecurityGroup $using:ManagementSecurityGroup `
             -CredentialEncryptionCertificate $Certificate
 
     Install-NetworkController `
             -Node $node `
             -ClientAuthentication Kerberos `
-            -ClientSecurityGroup "Adatum\Network Controller Ops" `
-            -RestIpAddress "10.60.0.99/24" `
+            -ClientSecurityGroup $using:ClientSecurityGroup `
             -ServerCertificate $Certificate
+#            -RestIpAddress $RestIpAddress 
 }
 
+Write-Host -ForegroundColor Cyan "Deploy NetworkController..................... done."
 
-    Get-NetworkControllerCluster
-    Get-NetworkController
-    Get-NetworkControllerDeploymentInfo -NetworkController SVR1
+#endregion
+
+#region Validate NetworkController Deployment
+
+$cred=New-Object -TypeName Microsoft.Windows.Networkcontroller.credentialproperties
+$cred.type="usernamepassword"
+$cred.username="admin"
+$cred.value="abcd"
+New-NetworkControllerCredential -ConnectionUri https://svr1.adatum.com -Properties $cred -ResourceId cred1 -Force
+Get-NetworkControllerCredential -ConnectionUri https://svr1.adatum.com -ResourceId cred1  
+
+#endregion
+
+#region temp useful command to debug
+
+Get-NetworkController
+Get-NetworkControllerDeploymentInfo -NetworkController SVR1
+
+Get-NetworkControllerServer -ConnectionUri "https://SVR1.Adatum.com"
+netstat –anp tcp |findstr 6640
+
+Get-Service NCHostAgent
+Get-Service SlbHostAgent
+
+
+Debug-NetworkControllerConfigurationState -NetworkController svr1.adatum.com -Verbose 
+
+
+Get-Module -ListAvailable -Name *fabric*
+Get-Command -Module ServiceFabric
+
+Debug-ServiceFabricNodeStatus -ServiceTypeName "VSwitchService"
+
+
+#endregion 
+
+#region Add server
+
+# Example 1: Add a server
+# -----------------------
+
+# The first command creates a CredentialProperties object, and then stores it in the $CredentialProperties variable.
+$CredentialProperties = [Microsoft.Windows.NetworkController.CredentialProperties]@{Type="UsernamePassword";UserName="admin";Value="password"}
+
+# The second command creates a credential that has the properties in $CredentialProperties by using the New-NetworkControllerCredential cmdlet.
+New-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://restserver" -Properties $CredentialProperties
+
+# The third command gets the credential by using the Get-NetworkControllerCredential cmdlet, and then stores it in the $Credential variable.
+$Credential = Get-NetworkControllerCredential -ResourceId "Credential01" -ConnectionUri "https://restserver"
+
+# The fourth command creates a ServerProperties object by using the New-Object cmdlet. The command stores the object in the $ServerProperties variable.
+$ServerProperties = New-Object Microsoft.Windows.NetworkController.ServerProperties
+
+# The next five commands assign values to properties of $ServerProperties.
+$ServerProperties.Connections = @([Microsoft.Windows.NetworkController.Connection]@{ManagementAddresses=@("192.168.0.12");Credential=$Credential})
+$ServerProperties.RackSlot = "1"
+$ServerProperties.OS = "Windows Server 2016"
+$ServerProperties.Vendor = "Dell"
+$ServerProperties.Model = "PowerEdge R730"
+
+# The final command adds a server to the Network Controller that has the resource ID Server01. The command identifies the Network Controller by URI.
+# The command specifies the properties of the server by using $ServerProperties.
+New-NetworkControllerServer -ConnectionUri "https://networkcontroller" -ResourceId "Server01" -Properties $ServerProperties
 
 #endregion
 
@@ -115,9 +206,9 @@ $VirtualNetworkProperties.Subnets[1].ResourceId = "Subnet2"
 $VirtualNetworkProperties.Subnets[1].Properties.AddressPrefix = "192.168.2.0/24"
 $VirtualNetworkProperties.Subnets[1].Properties.AccessControlList.ResourceRef = "/accessControlList/AllowAll"
 
-# Apply the settings -- funktioniert nicht Krrrrrr :-((
+# Apply the settings
 $Uri = "https://SVR1.adatum.com"
-#$Uri = "https://10.60.0.99"
+
 New-NetworkControllerVirtualNetwork -ResourceId "MyNetwork" -Properties $VirtualNetworkProperties -ConnectionUri $Uri -Verbose -Force
 
 #endregion
