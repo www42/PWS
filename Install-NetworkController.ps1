@@ -131,7 +131,9 @@ Enter-PSSession -Session $SVR1
 Get-NetworkController
 Get-NetworkControllerDeploymentInfo -NetworkController SVR1
 
-Get-NetworkControllerServer -ConnectionUri "https://SVR1.Adatum.com"
+Get-NetworkControllerServer -ConnectionUri "https://SVR1.Adatum.com" -Verbose
+
+# OVSDB
 netstat –anp tcp |findstr 6640
 
 Get-Service NCHostAgent
@@ -215,7 +217,7 @@ $VirtualNetworkProperties.Subnets[1].Properties.AddressPrefix = "192.168.2.0/24"
 $VirtualNetworkProperties.Subnets[1].Properties.AccessControlList.ResourceRef = "/accessControlList/AllowAll"
 
 # Apply the settings
-$Uri = "https://SVR1.adatum.com"
+$Uri = "https://svr1.adatum.com"
 
 New-NetworkControllerVirtualNetwork -ResourceId "MyNetwork" -Properties $VirtualNetworkProperties -ConnectionUri $Uri -Verbose -Force
 
