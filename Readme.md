@@ -2,6 +2,8 @@
 
 ## Virtual Machines
 ## DC1
-* Domain controller __adatum.com__
+* First domain controller in __Adatum.com__
+* Static IP x.x.0.10/16
 * DNS server
 * DHCP server
+* Certificate Authority __AdatumCA__

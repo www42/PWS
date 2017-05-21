@@ -3,7 +3,7 @@
 
 #  DC1 = First Domain Controller in Adatum.com
 
-#  Static IP address
+#  Static IP address x.x.0.10/16
 #  DNS server with reverse lookup zone
 #  DHCP server
 #  Enterprise Root CA
