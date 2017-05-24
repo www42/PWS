@@ -4,7 +4,7 @@
 
   # SVR1
   # Server with Desktop Experience
-  # Static IP address 10.70.0.21 /16
+  # Static IP address x.x.0.21 /16
   # Member domain Adatum.com
   # 
   # Nano Server Deployment Workbench
