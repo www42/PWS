@@ -36,7 +36,7 @@ $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 $LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
 $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
 
-Write-Host -ForegroundColor Cyan "Variables.................................... done."
+Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
 #endregion
 
@@ -48,7 +48,7 @@ Start-LabVm -VmComputerName $VmComputerName
 # Wait for specialize and oobe to complete
 Start-Sleep -Seconds 180
 
-Write-Host -ForegroundColor Cyan "Create VM.................................... done."
+Write-Host -ForegroundColor DarkCyan "Create VM.................................... done."
 
 #endregion
 
@@ -62,7 +62,7 @@ Invoke-Command -VMName $VmName -Credential $LocalCred {
 
 # Wait for reboot
 Start-Sleep -Seconds 60
-Write-Host -ForegroundColor Cyan "Rename and IP configuration.................. done."
+Write-Host -ForegroundColor DarkCyan "Rename and IP configuration.................. done."
 
 #endregion
 
@@ -75,7 +75,7 @@ Invoke-Command -VMName $VmName -Credential $LocalCred {
     }
 
 Start-Sleep -Seconds 60
-Write-Host -ForegroundColor Cyan "Join Domain.................................. done."
+Write-Host -ForegroundColor DarkCyan "Join Domain.................................. done."
 
 #endregion
 
@@ -121,6 +121,6 @@ Invoke-Command -VMName $VmName -Credential $DomCred {
 
 Set-VMDvdDrive -VMName $VmName -Path $null
 
-Write-Host -ForegroundColor Cyan "Create Nano Workbench........................ done."
+Write-Host -ForegroundColor DarkCyan "Create Nano Workbench........................ done."
 
 #endregion

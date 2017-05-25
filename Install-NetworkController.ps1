@@ -36,7 +36,7 @@ $ServerVmName = ConvertTo-VmName -VmComputerName $ServerComputerName
 $DcVmName     = ConvertTo-VmName -VmComputerName $DcComputerName
 $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
 
-Write-Host -ForegroundColor Cyan "Variables.................................... done."
+Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
 #endregion
 
@@ -62,7 +62,7 @@ Invoke-Command -VMName $DcVmName -Credential $DomCred {
                           "CN=Network Controller Admins,CN=Users,DC=Adatum,DC=com"
 }
 
-Write-Host -ForegroundColor Cyan "Create AD groups............................. done."
+Write-Host -ForegroundColor DarkCyan "Create AD groups............................. done."
 
 #endregion
 
@@ -76,7 +76,7 @@ Invoke-Command -VMName $ServerVmName -Credential $DomCred {
 
 Start-Sleep -Seconds 60
 
-Write-Host -ForegroundColor Cyan "Install role NetworkController............... done."
+Write-Host -ForegroundColor DarkCyan "Install role NetworkController............... done."
 
 #endregion
 
@@ -108,7 +108,7 @@ Invoke-Command -VMName $ServerVmName -Credential $DomCred {
 #            -RestIpAddress $RestIpAddress 
 }
 
-Write-Host -ForegroundColor Cyan "Deploy NetworkController..................... done."
+Write-Host -ForegroundColor DarkCyan "Deploy NetworkController..................... done."
 
 #endregion
 
