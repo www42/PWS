@@ -1,12 +1,16 @@
 ## Welcome to the PWS repository!
 
-# Create Virtual Machines
-DC1 Domain Controller _Adatum.com_ [Create-DC1.ps1](./Create-DC1.md)
+[What is PWS?](https://www.prader-willi.de/alles-uber-pws/)
 
-SVR1 Member Server [Create-SVR1](https://google.com)
+# First: Create Virtual Machines
+| Role                            |      |                           | Script                               |
+|---------------------------------|------|---------------------------|--------------------------------------|
+| Domain Controller _Adatum.com_  | DC1  |[README](./Create-DC1.md)  | [Create-DC1.ps1](./Create-DC1.ps1)   |
+| Member Server                   | SVR1 |[README](./Create-SVR1.md) | [Create-SVR1.ps1](./Create-SVR1.ps1) | 
 
-# Install Something
+# Next: Add Functionality
 
-Network Controller [Install-NetworkController.ps1](https://google.com)
-
-Container Host [Install-ContainerHost.ps1](https://google.com)
+| Fuctionality       |            | Script                            |
+| ------------------ | ---------- | --------------------------------- |
+| Network Controller | [README]() | [Install-NetworkController.ps1]() |
+| Container Host     | [README]() | [Install-ContainerHost.ps1]()     |
