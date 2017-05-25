@@ -1,16 +1,12 @@
-# Welcome to the PWS repo
+## Welcome to the PWS repository!
 
-## Virtual Machines
-## DC1
-* First domain controller in __Adatum.com__
-* Static IP address x.y.0.10 /16
-* DNS server
-* DHCP server
-* Certificate Authority __AdatumCA__
+# Create Virtual Machines
+DC1 Domain Controller _Adatum.com_ [Create-DC1.ps1](./Create-DC1.md)
 
-## SVR1
-* Member server in __Adatum.com__
-* Static IP address x.y.0.21 /16
-* Nano server deployment workbench
-    * C:\\Nano_Workbench contains everything needed to build Nano images
-     
+SVR1 Member Server [Create-SVR1](https://google.com)
+
+# Install Something
+
+Network Controller [Install-NetworkController.ps1](https://google.com)
+
+Container Host [Install-ContainerHost.ps1](https://google.com)
