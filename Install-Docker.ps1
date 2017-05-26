@@ -2,7 +2,7 @@
 #region Variables
 
 $Lab = "PWS"
-$ServerComputerName = "NANO2"
+$ServerComputerName = "NANO4"
 
 $ServerVmName = ConvertTo-VmName -VmComputerName $ServerComputerName -Lab $Lab
 $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
@@ -28,6 +28,7 @@ Start-Sleep -Seconds 60
 
 Invoke-Command -ComputerName $ServerComputerName -Credential $DomCred {
   Get-Service -Name Docker
-  Get-Command -Name docker,dockerd | ft Name,Version,Source }
+  Get-Command -Name docker,dockerd | ft Name,Version,Source 
+}
 
 #endregion

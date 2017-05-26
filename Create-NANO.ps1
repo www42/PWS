@@ -19,8 +19,8 @@
 
 #endregion
 
-[string]$NanoComputerName   = "NANO1"
-[string]$NanoIPv4Address    = "10.70.17.1"
+[string]$NanoComputerName   = "NANO6"
+[string]$NanoIPv4Address    = "10.70.17.6"
 
 #region Variables
 
@@ -45,6 +45,7 @@ Write-Host -ForegroundColor DarkCyan "Variables.................................
 [string]$NanoRootPath       = "C:\Nano_WorkBench"
 [string]$NanoBasePath       = "$NanoRootPath\Base"
 [string]$NanoTargetPath     = "$NanoRootPath\Target\$NanoComputerName.vhdx"
+[long]  $MaxSize            = 40GB
 [string]$NanoDeploymentType = "Guest"
 [string]$NanoEdition        = "Datacenter"
 [string]$NanoUnattendPath   = "$NanoRootPath\TimeZone.xml"
@@ -72,6 +73,7 @@ Invoke-Command -VMName $ServerVmName -Credential $DomCred {
         -Edition               $Using:NanoEdition `
         -BasePath              $Using:NanoBasePath `
         -TargetPath            $Using:NanoTargetPath `
+        -MaxSize               $Using:MaxSize `
         -ComputerName          $Using:NanoComputerName `
         -AdministratorPassword $Using:NanoPw `
         -InterfaceNameOrIndex  $Using:NanoInterface `
@@ -81,6 +83,7 @@ Invoke-Command -VMName $ServerVmName -Credential $DomCred {
         -Ipv4Dns               $Using:NanoIpv4Dns `
         -DomainName            $Using:NanoDomainName `
         -UnattendPath          $Using:NanoUnattendPath `
+        -Containers `
         | Out-Null
 }
 
