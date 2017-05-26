@@ -19,21 +19,23 @@
 
 #endregion
 
+[string]$NanoComputerName   = "NANO1"
+[string]$NanoIPv4Address    = "10.70.17.1"
+
 #region Variables
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab            = "PWS"
-$VmComputerName = "SVR1"
-$VmName = ConvertTo-VmName -VmComputerName $VmComputerName
+$Lab = "PWS"
+$ServerComputerName = "SVR1"
+$serverVmName = ConvertTo-VmName -VmComputerName $ServerComputerName -Lab $Lab
 
 $LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
 $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
 
-#endregion
+Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
-[string]$NanoComputerName   = "NANO1"
-[string]$NanoIPv4Address    = "10.70.17.1"
+#endregion
 
 #region More Nano Variables
 
@@ -55,11 +57,13 @@ $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Admini
 [long]  $NanoProcessorCount = 1
 [securestring]$NanoPw       = ConvertTo-SecureString -String 'Pa$$w0rd' -AsPlainText -Force
 
+Write-Host -ForegroundColor DarkCyan "More Nano Variables.......................... done."
+
 #endregion
 
-#region Schritt 1: Generate Nano Image
+#region Step 1: Generate Nano Image
 
-Invoke-Command -VMName $VmName -Credential $DomCred {
+Invoke-Command -VMName $ServerVmName -Credential $DomCred {
 
     Import-Module -Name $Using:NanoRootPath\NanoServerImageGenerator.psd1
 
@@ -77,14 +81,14 @@ Invoke-Command -VMName $VmName -Credential $DomCred {
         -Ipv4Dns               $Using:NanoIpv4Dns `
         -DomainName            $Using:NanoDomainName `
         -UnattendPath          $Using:NanoUnattendPath `
-        -Containers -Defender
-
-  dir C:\Nano_WorkBench\Target
+        | Out-Null
 }
+
+Write-Host -ForegroundColor DarkCyan "Step 1: Generate Nano Image.................. done."
 
 #endregion
 
-#region Schritt 2: Deploy Nano VM
+#region Step 2: Deploy Nano VM
 
 # VM NANO1 anlegen
 New-LabVmGen2 -VmComputerName $NanoComputerName -Count $NanoProcessorCount -Mem $NanoMem
@@ -94,21 +98,41 @@ $NanoVmName = ConvertTo-VmName -VmComputerName $NanoComputerName -Lab $Lab
 $DestinationFile = Get-VM $NanoVmName | % HardDrives | % Path
 # Diese vhdx muß jetzt ersetzt werden durch das NANO Image
 
-# Kopieren mit PowerShell Direct
-$TempSession = New-PSSession -VMName $VmName -Credential $DomCred
+# Kopieren über das Netzwerk (Kopieren mit PowerShell Direct dauert zu lange)
+# Namensauflösung sollte über ../etc/hosts funktionieren
+# Resolve-DnsName -Name $NanoComputerName
 
-# Copy-Item -FromSession $TempSession -Path $NanoTargetPath -Destination $DestinationFile -Force
-# Funktioniert nicht! -Destination kann anscheinend nur der Ziel*Pfad* sein. Beim normalen copy kann -Destination doch auch die Ziel*Datei* sein.
+$TempSession = New-PSSession -ComputerName $ServerComputerName -Credential $DomCred
 
-# Keep it simple: aus SVR1 herauskopieren auf Platte D:\temp, und dann auf Platte verschieben
-$TempFolder = "D:\temp"
-if (-not (Test-Path -Path $TempFolder)) {New-Item -ItemType Directory -Path $TempFolder}
-
-Copy-Item -FromSession $TempSession -Path $NanoTargetPath -Destination $TempFolder
-# Das dauert etwa 3 Minuten.
-
-Move-Item -Path "$TempFolder\$NanoComputerName.vhdx" -Destination $DestinationFile -Force
+Copy-Item -FromSession $TempSession -Path $NanoTargetPath -Destination $DestinationFile 
 
 Remove-PSSession -Session $TempSession
+
+Write-Host -ForegroundColor DarkCyan "Step 2: Deploy Nano VM....................... done."
+
+#endregion
+
+#region Optional: Update Nano - about 20 min
+
+Start-LabVm -VmComputerName $NanoComputerName
+Start-Sleep -Seconds 10
+
+Invoke-Command -VMName $NanoVmName -Credential $DomCred {
+  $ci = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName MSFT_WUOperationsSession
+  Invoke-CimMethod -InputObject $ci -MethodName ApplyApplicableUpdates | Out-Null
+  Restart-Computer
+}
+
+Start-Sleep -Seconds 120
+
+# Get a list of installed updates
+Invoke-Command -VMName $NanoVmName -Credential $DomCred {
+  $ci = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName MSFT_WUOperationsSession
+  $Result = Invoke-CimMethod -InputObject $ci -MethodName ScanForUpdates -Arguments @{SearchCriteria="IsInstalled=1";OnlineScan=$true}
+  $Result.Updates.Title
+}
+
+Write-Host -ForegroundColor DarkCyan "Optional: Update Nano - about 20 min......... done."
+
 
 #endregion
