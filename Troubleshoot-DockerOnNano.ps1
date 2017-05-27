@@ -1,8 +1,15 @@
-﻿$DomCred = Get-Credential -Credential adatum\administrator
-$NANO4 = New-PSSession -VMName PWS-NANO4 -Credential $DomCred
-$NANO5 = New-PSSession -ComputerName 10.70.17.5 -Credential $DomCred
+﻿# Windows version
+# ---------------
+function GetWinVer {
+  $version    = Get-CimInstance -ClassName Win32_OperatingSystem | % version
+  $Major      = $version.split(".")[0]
+  $Minor      = $version.split(".")[1]
+  $BuildLabEx = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\' | % BuildLabEx
+  $Build      = $BuildLabEx.split(".")[0]
+  $Revision   = $BuildLabEx.split(".")[1]
+  echo "$Major.$Minor.$Build.$Revision" }
+GetWinVer
 
-Enter-PSSession -Session $NANO4
 
 # Updates installed?
 # ------------------
@@ -10,11 +17,17 @@ $ci = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName
 $Result = Invoke-CimMethod -InputObject $ci -MethodName ScanForUpdates -Arguments @{SearchCriteria="IsInstalled=1";OnlineScan=$true}
 $Result.Updates.Title
 
+
 # Enough space on volume?
 # ------------------------
 get-volume | 
   ft @{n="Size (GB)";     e={[math]::Round($_.size/1gb,1)}},`
      @{n="Size remaining";e={[math]::Round($_.sizeremaining/1gb,1)}}
+
+
+# PackageProvider installed?
+Get-PackageProvider -ListAvailable -Name DockerMsftProvider
+
 
 # Docker running?
 Get-Service -Name Docker
@@ -40,7 +53,5 @@ docker pull microsoft/nanoserver
 #     + CategoryInfo          : NotSpecified: (failed to regis...period expired.:String) [], RemoteException
 #     + FullyQualifiedErrorId : NativeCommandError
 #  
-net use z: \\10.70.0.200\temp /user:foo bar
-docker load -i z:\Docker_images\nanoserver.tar
 # :-((
 

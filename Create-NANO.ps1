@@ -19,8 +19,8 @@
 
 #endregion
 
-[string]$NanoComputerName   = "NANO6"
-[string]$NanoIPv4Address    = "10.70.17.6"
+[string]$NanoComputerName   = "NANO2"
+[string]$NanoIPv4Address    = "10.70.17.2"
 
 #region Variables
 
@@ -54,8 +54,8 @@ Write-Host -ForegroundColor DarkCyan "Variables.................................
 [string]$NanoIpv4Gateway    = "10.70.0.1"
 [string]$NanoIpv4Dns        = "10.70.0.10"
 [string]$NanoDomainName     = "Adatum.com"
-[long]  $NanoMem            = 1GB
-[long]  $NanoProcessorCount = 1
+[long]  $NanoMem            = 2GB
+[long]  $NanoProcessorCount = 2
 [securestring]$NanoPw       = ConvertTo-SecureString -String 'Pa$$w0rd' -AsPlainText -Force
 
 Write-Host -ForegroundColor DarkCyan "More Nano Variables.......................... done."
@@ -123,19 +123,23 @@ Start-Sleep -Seconds 10
 Invoke-Command -VMName $NanoVmName -Credential $DomCred {
   $ci = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName MSFT_WUOperationsSession
   Invoke-CimMethod -InputObject $ci -MethodName ApplyApplicableUpdates | Out-Null
-  Restart-Computer
 }
+
+Stop-LabVm $NanoComputerName
+Start-LabVm $NanoComputerName
 
 Start-Sleep -Seconds 120
 
-# Get a list of installed updates
+Write-Host -ForegroundColor DarkCyan "Optional: Update Nano - about 20 min......... done."
+
+#endregion
+
+#region Get a list of installed updates
+
 Invoke-Command -VMName $NanoVmName -Credential $DomCred {
   $ci = New-CimInstance -Namespace root/Microsoft/Windows/WindowsUpdate -ClassName MSFT_WUOperationsSession
   $Result = Invoke-CimMethod -InputObject $ci -MethodName ScanForUpdates -Arguments @{SearchCriteria="IsInstalled=1";OnlineScan=$true}
   $Result.Updates.Title
 }
-
-Write-Host -ForegroundColor DarkCyan "Optional: Update Nano - about 20 min......... done."
-
 
 #endregion
