@@ -19,8 +19,8 @@
 
 #endregion
 
-[string]$NanoComputerName   = "NANO2"
-[string]$NanoIPv4Address    = "10.70.17.2"
+[string]$NanoComputerName   = "NANO3"
+[string]$NanoIPv4Address    = "10.70.17.3"
 
 #region Variables
 
@@ -83,7 +83,7 @@ Invoke-Command -VMName $ServerVmName -Credential $DomCred {
         -Ipv4Dns               $Using:NanoIpv4Dns `
         -DomainName            $Using:NanoDomainName `
         -UnattendPath          $Using:NanoUnattendPath `
-        -Containers `
+        -Containers -Compute `
         | Out-Null
 }
 
