@@ -142,4 +142,6 @@ Invoke-Command -VMName $NanoVmName -Credential $DomCred {
   $Result.Updates.Title
 }
 
+Write-Host -ForegroundColor DarkCyan "Get a list of installed updates.............. done."
+
 #endregion

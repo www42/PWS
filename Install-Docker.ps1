@@ -1,7 +1,7 @@
 ﻿
 #region Variables
 
-$ServerComputerName = "NANO1"
+$ServerComputerName = "NANO3"
 $Lab = "PWS"
 
 $ServerVmName = ConvertTo-VmName -VmComputerName $ServerComputerName -Lab $Lab
