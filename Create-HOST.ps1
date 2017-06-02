@@ -24,11 +24,20 @@ $LabSwitch       = "PWS"
 
 #region Create scheduled task to start ISE at logon
 
+# Old style
+# ---------
 # cmd  (as administrator)
-#
 # echo start %windir%\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe > %HOMEPATH%\Documents\StartISE.bat
-#
 # schtasks /CREATE /SC ONLOGON /TN "Start PowerShell ISE at logon" /TR %HOMEPATH%\Documents\StartISE.bat /RL HIGHEST
+
+# New style
+# ----------
+$TaskName    = "Start Powershell ISE for $env:USERNAME"
+$AtLogon     = New-ScheduledTaskTrigger -AtLogOn
+$StartIse    = New-ScheduledTaskAction -Execute PowerShell_ISE.exe
+$CurrentUser = New-ScheduledTaskPrincipal -RunLevel Highest -LogonType Interactive -UserId $env:USERNAME
+
+Register-ScheduledTask -TaskName $TaskName -TaskPath "\" -Trigger $AtLogon -Action $StartIse -Principal $CurrentUser
 
 #endregion
 
