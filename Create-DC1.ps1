@@ -14,14 +14,14 @@
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab             = "PWS"
-$LabSwitch       = "PWS"
+$Lab             = "HDP"
+$LabSwitch       = "HDP"
 $VmComputerName  = "DC1"
 $IfAlias         = "Ethernet"
-$IpAddress       = "10.70.0.10"
+$IpAddress       = "10.80.0.10"
 $PrefixLength    = "16"
-$DefaultGw       = "10.70.0.1"
-$DnsServer       = "10.70.0.10"
+$DefaultGw       = "10.80.0.1"
+$DnsServer       = "10.80.0.10"
 $AdDomain        = "Adatum.com"
 $AdDomainNetBios = "ADATUM"
 
@@ -95,8 +95,8 @@ Write-Host -ForegroundColor DarkCyan "Dcpromo New Forest........................
 #region Configure DNS Server
 
 Invoke-Command -VMName $VmName -Credential $DomCred {   
-    Add-DnsServerPrimaryZone -NetworkId '10.70.0.0/16' -ReplicationScope Domain -DynamicUpdate Secure
-    Add-DnsServerResourceRecordPtr -ZoneName "70.10.in-addr.arpa" -Name "10.0" -PtrDomainName "DC1.Adatum.com."
+    Add-DnsServerPrimaryZone -NetworkId '10.80.0.0/16' -ReplicationScope Domain -DynamicUpdate Secure
+    Add-DnsServerResourceRecordPtr -ZoneName "80.10.in-addr.arpa" -Name "10.0" -PtrDomainName "DC1.Adatum.com."
     Add-DnsServerForwarder -IPAddress 8.8.8.8
     Remove-DnsServerForwarder -IPAddress fec0:0:0:ffff::1,fec0:0:0:ffff::2,fec0:0:0:ffff::3 -Force
     }
@@ -124,11 +124,11 @@ Invoke-Command -VMName $VmName -Credential $domcred {
 
     # new scope with scope options
     Add-DhcpServerv4Scope -Name "Deployment" `
-                      -StartRange 10.70.99.1 `
-                      -EndRange   10.70.99.199 `
+                      -StartRange 10.80.99.1 `
+                      -EndRange   10.80.99.199 `
                       -SubnetMask 255.255.0.0 -PassThru |
-        Set-DhcpServerv4OptionValue -DnsServer 10.70.0.10 `
-                                    -Router 10.70.0.1
+        Set-DhcpServerv4OptionValue -DnsServer 10.80.0.10 `
+                                    -Router 10.80.0.1
     }
 
 Write-Host -ForegroundColor DarkCyan "Install and configure DHCP Server............ done."

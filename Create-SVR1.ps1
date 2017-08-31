@@ -8,7 +8,7 @@
   # Member domain Adatum.com
   # 
   # Nano Server Deployment Workbench
-  #   d.h. es ist allen vorhanden was man braucht, um Nano Images zu deployen
+  #   d.h. es ist alles vorhanden was man braucht, um Nano Images zu deployen
   #   C:\Nano_Workbench
 
 
@@ -18,14 +18,14 @@
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab            = "PWS"
-$LabSwitch      = "PWS"
+$Lab            = "HDP"
+$LabSwitch      = "HDP"
 $VmComputerName = "SVR1"
 $IfAlias        = "Ethernet"
-$IpAddress      = "10.70.0.21"
+$IpAddress      = "10.80.0.21"
 $PrefixLength   = "16"
-$DefaultGw      = "10.70.0.1"
-$DnsServer      = "10.70.0.10"
+$DefaultGw      = "10.80.0.1"
+$DnsServer      = "10.80.0.10"
 $AdDomain       = "Adatum.com"
 
 $Ws2016Iso      = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"

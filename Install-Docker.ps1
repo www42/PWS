@@ -38,7 +38,20 @@ Invoke-Command -ComputerName $ServerComputerName -Credential $DomCred {
   Get-Service -Name Docker
   Get-Command -Name docker,dockerd | ft Name,Version,Source 
   docker version
+
+  # Two FW rule have been installed enabling DNS
+  #
+  Get-NetFirewallPortFilter | ? LocalPort -EQ 53 | 
+    foreach { 
+        $p = $_.Protocol
+        $l = $_.LocalPort
+        $r = $_.RemotePort
+        Get-NetFirewallRule -AssociatedNetFirewallPortFilter $_ | 
+            select Name,Action,Direction,@{l="Proto";e={$p}},@{l="Local Port";e={$l}},@{l="Remote Port";e={$r}} 
+      } | ft
+
 }
+
 
 Write-Host -ForegroundColor DarkCyan "Test Docker installation..................... done."
 

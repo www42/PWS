@@ -2,8 +2,8 @@
 #
 #   netsh advfirewall firewall add rule name="Docker daemon" dir=in action=allow protocol=TCP localport=2375
 
-New-NetFirewallRule -Name "Allow Docker daemon" `
-                    -DisplayName "Allow Docker daemon" `
+New-NetFirewallRule -Name "Container: Allow Docker daemon" `
+                    -DisplayName "Container: Allow Docker daemon" `
                     -Direction Inbound `
                     -Action Allow `
                     -LocalPort 2375 `
@@ -19,7 +19,7 @@ Add-Content -Path $DockerConfig -Value '{ "hosts": ["tcp://0.0.0.0:2375", "npipe
 Restart-Service -Name Docker
 
 # Start Docker client remotely by
-#   docker -H tcp://<ip>:2375 <command>
+#   docker -H tcp://<ip> <command>
 #
 # or set env variable
 #   $env:DOCKER_HOST = 'tcp://<ip>:2375'
