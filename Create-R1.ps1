@@ -1,9 +1,8 @@
-﻿
-$VmName          = "PWS-R1"
-$Dir             = "D:\Labs\PWS"
-$Switch_Private  = "PWS"
+﻿$VmName          = "HDP-R1"
+$Dir             = "C:\Labs\HDP"
+$Switch_Private  = "HDP"
 $Switch_External = "External Network"
-$VyosTemplate    = "D:\Base\vyos-999.201612310331-amd64.vhd"
+$VyosTemplate    = "C:\Base\vyos-999.201703132237-amd64.vhd"
 
 $VmDir   = Join-Path $Dir $VmName
 $VhdDir  = Join-Path $VmDir  "Virtual Hard Disks"
@@ -20,7 +19,7 @@ Start-VM -Name $VmName
 vmconnect.exe localhost $VmName
 
 # login: vyos
-# Password: Pa$$w0rd
+# Password: Pa55w.rd
 #
 # # Hint: Use Tab completion
 #
@@ -47,3 +46,6 @@ vmconnect.exe localhost $VmName
 #         exit
 #      reboot now
 # 
+# poweroff now
+
+Export-VM -Name $VmName -Path C:\Transfer\VMs

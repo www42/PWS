@@ -28,8 +28,16 @@ $DefaultGw      = "10.80.0.1"
 $DnsServer      = "10.80.0.10"
 $AdDomain       = "Adatum.com"
 
-$Ws2016Iso      = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
-$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
+# en-US
+# -----------
+#$Ws2016Iso      = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
+#$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
+
+# de-DE
+# -----------
+$Ws2016Iso      = "C:\iso\14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_DE-DE.ISO"
+$Ws2016IsoLabel = "SSS_X64FREE_DE-DE_DV9"
+
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 

@@ -16,9 +16,9 @@
 
 #region Variables
 
-$Lab             = "PWS"
-$LabDir          = "D:\Labs\PWS"
-$LabSwitch       = "PWS"
+$Lab             = "HDP"
+$LabDir          = "C:\Labs\HDP"
+$LabSwitch       = "HDP"
 
 #endregion
 
@@ -32,40 +32,45 @@ $LabSwitch       = "PWS"
 
 # New style
 # ----------
-$TaskName    = "Start Powershell ISE for $env:USERNAME"
-$AtLogon     = New-ScheduledTaskTrigger -AtLogOn
-$StartIse    = New-ScheduledTaskAction -Execute PowerShell_ISE.exe
-$CurrentUser = New-ScheduledTaskPrincipal -RunLevel Highest -LogonType Interactive -UserId $env:USERNAME
+#$TaskName    = "Start Powershell ISE for $env:USERNAME"
+#$AtLogon     = New-ScheduledTaskTrigger -AtLogOn
+#$StartIse    = New-ScheduledTaskAction -Execute PowerShell_ISE.exe
+#$CurrentUser = New-ScheduledTaskPrincipal -RunLevel Highest -LogonType Interactive -UserId $env:USERNAME
 
-Register-ScheduledTask -TaskName $TaskName -TaskPath "\" -Trigger $AtLogon -Action $StartIse -Principal $CurrentUser
+#Register-ScheduledTask -TaskName $TaskName -TaskPath "\" -Trigger $AtLogon -Action $StartIse -Principal $CurrentUser
+
+#endregion
+
+#region Map Drive T: to Transfer
+
+Get-Volume
+New-SmbMapping -LocalPath T: -RemotePath "\\HOST10\Transfer" -UserName Administrator -Password 'Pa$$w0rd' -Persistent:$true
 
 #endregion
 
 #region Copy Base files
 
-Get-Volume
-New-SmbMapping -LocalPath T: -RemotePath "\\10.1.7.12\Transfer"
 $SourceDir = "T:\Base"
-$DestDir   = "D:\Base"
+$DestDir   = "C:\Base"
 New-Item -ItemType Directory -Path $DestDir -Force
-Copy-Item -Path $SourceDir\Base-WS2016_1607_withDesktopExperience_en_GPT_v0.3.vhdx -Destination $DestDir
+Copy-Item -Path $SourceDir\Base-WS2016_1607_withDesktopExperience_DE_GPT_1708.vhdx -Destination $DestDir
 
 #endregion
 
 #region Copy Iso files
 
 $SourceDir = "T:\iso"
-$DestDir   = "D:\iso"
+$DestDir   = "C:\iso"
 New-Item -ItemType Directory -Path $DestDir -Force
-Copy-Item -Path $SourceDir\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO -Destination $DestDir
+Copy-Item -Path $SourceDir\14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_DE-DE.ISO -Destination $DestDir
 
 #endregion
 
 #region Download custom PowerShell module "tjLabs"
 
-Register-PSRepository -Name MyGet -SourceLocation https://www.myget.org/F/tj/api/v2/
-Get-PSRepository
-Install-Module -Name tjLabs -MinimumVersion 0.2.6.5 -Repository MyGet
+#Register-PSRepository -Name MyGet -SourceLocation https://www.myget.org/F/tj/api/v2/
+#Get-PSRepository
+#Install-Module -Name tjLabs -MinimumVersion 0.2.6.5 -Repository MyGet
 
 #endregion
 
@@ -73,23 +78,23 @@ Install-Module -Name tjLabs -MinimumVersion 0.2.6.5 -Repository MyGet
 
 New-Item -ItemType File -Path $profile.CurrentUserAllHosts -Force | Out-Null
 
-Write-Output '[string]$Lab          = "PWS"'                                                              > $profile.CurrentUserAllHosts
-Write-Output '[string]$LabDrive     = "D:"'                                                              >> $profile.CurrentUserAllHosts
-Write-Output '[string]$LabDir       = "D:\Labs\PWS"'                                                     >> $profile.CurrentUserAllHosts
-Write-Output '[string]$LabSwitch    = "PWS"'                                                             >> $profile.CurrentUserAllHosts
-Write-Output '[string]$LabBaseGen1  = "D:\Base\vyos-999.201612310331-amd64.vhd"'                         >> $profile.CurrentUserAllHosts
-Write-Output '[string]$LabBaseGen2  = "D:\Base\Base-WS2016_1607_withDesktopExperience_en_GPT_v0.3.vhdx"' >> $profile.CurrentUserAllHosts
+Write-Output '[string]$Lab          = "HDP"'                                                              > $profile.CurrentUserAllHosts
+Write-Output '[string]$LabDrive     = "C:"'                                                              >> $profile.CurrentUserAllHosts
+Write-Output '[string]$LabDir       = "C:\Labs\HDP"'                                                     >> $profile.CurrentUserAllHosts
+Write-Output '[string]$LabSwitch    = "HDP"'                                                             >> $profile.CurrentUserAllHosts
+Write-Output '[string]$LabBaseGen1  = "C:\Base\vyos-999.201612310331-amd64.vhd"'                         >> $profile.CurrentUserAllHosts
+Write-Output '[string]$LabBaseGen2  = "C:\Base\Base-WS2016_1607_withDesktopExperience_DE_GPT_1708.vhdx"' >> $profile.CurrentUserAllHosts
 Write-Output '[long]  $LabMem       = 4GB'                                                               >> $profile.CurrentUserAllHosts
 Write-Output '[long]  $LabCpuCount  = 4'                                                                 >> $profile.CurrentUserAllHosts
 Write-Output '#------------------------------------------'                                               >> $profile.CurrentUserAllHosts
 Write-Output 'Write-Output  "This is PowerShell $($PSVersionTable.PSVersion)`n"'                         >> $profile.CurrentUserAllHosts
 Write-Output ''                                                                                          >> $profile.CurrentUserAllHosts
-Write-Output 'Write-Output "Loading module tjLabs..."'                                                   >> $profile.CurrentUserAllHosts
-Write-Output 'Import-Module -Name tjLabs -WarningAction SilentlyContinue '                               >> $profile.CurrentUserAllHosts
-Write-Output 'Get-Module -Name tjLabs | ft Name,Version'                                                 >> $profile.CurrentUserAllHosts
+#Write-Output 'Write-Output "Loading module tjLabs..."'                                                   >> $profile.CurrentUserAllHosts
+#Write-Output 'Import-Module -Name tjLabs -WarningAction SilentlyContinue '                               >> $profile.CurrentUserAllHosts
+#Write-Output 'Get-Module -Name tjLabs | ft Name,Version'                                                 >> $profile.CurrentUserAllHosts
 Write-Output ''                                                                                          >> $profile.CurrentUserAllHosts
 Write-Output 'if (Test-Path $LabDir) {cd $LabDir}'                                                       >> $profile.CurrentUserAllHosts
-Write-Output 'if(Get-Command Get-VM -ea SilentlyContinue) {"Current Lab is $Lab."; Show-Lab}'            >> $profile.CurrentUserAllHosts
+#Write-Output 'if(Get-Command Get-VM -ea SilentlyContinue) {"Current Lab is $Lab."; Show-Lab}'            >> $profile.CurrentUserAllHosts
 Write-Output 'function prompt {"$Lab> "}'                                                                >> $profile.CurrentUserAllHosts
 
 # Current Host is ISE
@@ -98,7 +103,7 @@ Write-Output '$psISE.Options.Zoom = 120' > $profile.CurrentUserCurrentHost
 
 #endregion
 
-#region Create Folders
+#region Create Lab Folder
 
 New-Item -ItemType Directory -Path $LabDir
 
@@ -121,25 +126,15 @@ Set-VMHost -VirtualHardDiskPath $LabDir
 #region Create Virtual Switches
 
 $NIC = Get-NetAdapter -Physical | ? Status -eq "Up"
-New-VMSwitch -Name "External Network" -NetAdapterName $NIC.Name
+New-VMSwitch -Name "External Network" -NetAdapterName $NIC.Name | Out-Null
 
-New-VMSwitch -Name $LabSwitch -SwitchType Internal
+New-VMSwitch -Name $LabSwitch -SwitchType Internal | Out-Null
 $idx = Get-NetAdapter  | where Name -Like *$LabSwitch* | % InterfaceIndex
 
-New-NetIPAddress -InterfaceIndex $idx -IPAddress "10.70.0.200" -PrefixLength "16"
+New-NetIPAddress -InterfaceIndex $idx -IPAddress "10.80.0.200" -PrefixLength "16" | Out-Null
 
-
-#endregion
-
-#region Import VM R1
-
-$SourceDir = "T:\VMs\PWS-R1"
-$DestDir   = $LabDir
-if (!(Test-Path $DestDir)) { New-Item -ItemType Directory -Path $DestDir }
-Copy-Item $SourceDir -Destination $DestDir -Recurse
-$R1 = "$DestDir\PWS-R1\Virtual Machines\C94694C2-2D3C-4975-A6B4-ED8D90677D55.vmcx"
-Compare-VM -Path $R1
-Import-VM -Path $R1
+Get-VMSwitch
+Get-NetIPConfiguration | ft InterfaceAlias,IPv4Address
 
 #endregion
 
@@ -147,13 +142,11 @@ Import-VM -Path $R1
 
 $etc = "C:\WINDOWS\system32\drivers\etc\hosts"
 Add-Content -Path $etc -Value "`r"
-Add-Content -Path $etc -Value "10.70.0.1    R1"
-Add-Content -Path $etc -Value "10.70.0.10   DC1"
-Add-Content -Path $etc -Value "10.70.0.21   SVR1"
-Add-Content -Path $etc -Value "10.70.17.1   NANO1"
-Add-Content -Path $etc -Value "10.70.17.2   NANO2"
-Add-Content -Path $etc -Value "10.70.17.3   NANO3"
-Add-Content -Path $etc -Value "10.70.17.4   NANO4"
+Add-Content -Path $etc -Value "10.80.0.1    R1"
+Add-Content -Path $etc -Value "10.80.0.10   DC1"
+Add-Content -Path $etc -Value "10.80.0.21   SVR1"
+Add-Content -Path $etc -Value "10.80.0.22   SVR2"
+Add-Content -Path $etc -Value "10.80.0.23   SVR3"
 Clear-DnsClientCache
 
 #endregion
@@ -162,5 +155,58 @@ Clear-DnsClientCache
 
 $TrustedHosts = "WSMan:\localhost\Client\TrustedHosts"
 Set-Item  $TrustedHosts -Value '*' -Force
+
+#endregion
+
+#region misc
+
+# Services
+    Set-Service -Name MapsBroker -StartupType Disabled
+    Set-Service -Name Audiosrv -StartupType Automatic
+    Start-Service -Name Audiosrv
+
+# Enhanced IE Security
+    $ESCAdminKey = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A7-37EF-4b3f-8CFC-4F3A74704073}"
+    $ESCUserKey  = "HKLM:\SOFTWARE\Microsoft\Active Setup\Installed Components\{A509B1A8-37EF-4b3f-8CFC-4F3A74704073}"
+    Set-ItemProperty -Path $ESCAdminKey -Name "IsInstalled" -Value 0
+    Set-ItemProperty -Path $ESCUserKey  -Name "IsInstalled" -Value 0
+    Stop-Process -Name Explorer -ErrorAction SilentlyContinue
+
+# IE Start Page
+    $IeStartPageKey = 'HKCU:\Software\Microsoft\Internet Explorer\Main\'
+    $Name = 'Start Page'
+    $Url = 'https://google.de'
+    Set-ItemProperty -Path $IeStartPageKey -Name $Name -Value $Url
+    (Get-ItemProperty -Path $IeStartPageKey -Name $Name).$Name
+
+#endregion
+
+#region Import VMs
+
+$SourceDir = "T:\Labs\HDP"
+$DestDir   = $LabDir
+if (!(Test-Path $DestDir)) { New-Item -ItemType Directory -Path $DestDir }
+
+Copy-Item $SourceDir\* -Destination $DestDir -Recurse -Container
+
+$R1 = "$DestDir\HDP-R1\Virtual Machines\A35E800B-2155-4E68-BE8F-E8151E6BAF14.vmcx"
+Compare-VM -Path $R1
+Import-VM -Path $R1
+
+$DC1 = "$DestDir\HDP-DC1\Virtual Machines\1EBC8627-6910-4DA2-906F-FD229BEB695D.vmcx"
+Compare-VM -Path $DC1
+Import-VM -Path $DC1
+
+$SVR1 = "$DestDir\HDP-SVR1\Virtual Machines\12D4B973-ABBD-4D92-A8D0-30A572DEF907.vmcx"
+Compare-VM -Path $SVR1
+Import-VM -Path $SVR1
+
+$SVR2 = "$DestDir\HDP-SVR2\Virtual Machines\A81277DF-280C-455C-9C8E-920AA5BDF949.vmcx"
+Compare-VM -Path $SVR2
+Import-VM -Path $SVR2
+
+$SVR3 = "$DestDir\HDP-SVR3\Virtual Machines\53C0103C-5F50-4554-A584-EE9134E75893.vmcx"
+Compare-VM -Path $SVR3
+Import-VM -Path $SVR3
 
 #endregion
