@@ -1,8 +1,7 @@
 ﻿
 #region Mount Windows Server Iso
 
-$IsoPath = "G:\iso\Windows_InsiderPreview_Server_16267.iso"
-           
+$IsoPath = "D:\iso\Windows_InsiderPreview_Server_16278.iso"
 
 $a = Mount-DiskImage -ImagePath $IsoPath -PassThru | Get-Volume | Select-Object -ExpandProperty DriveLetter 
 $IsoDriveLetter = $a + ":"
@@ -19,19 +18,20 @@ Get-WindowsImage -ImagePath $WimPath
 
 # Datacenter Edition with Desktop Experience
 #$Index = "4"
-Get-WindowsImage -ImagePath $WimPath -Index $Index
 
 # Datacenter Edition Core
 $Index = "2"
+
+Get-WindowsImage -ImagePath $WimPath -Index $Index
 
 #endregion
 
 #region Convert Wim Image into Bootable Vhd
 
-$VhdPath = "D:\BootVhd\WS1709-InsiderPreview_16267.vhd"
+$VhdPath = "D:\BootVhd\WS1709-InsiderPreview_16278.vhd"
 $VhdSize = 80GB
 
-$ScriptPath = "G:\BootVhd\Convert-WindowsImage--tj_line_4092.ps1"
+$ScriptPath = "D:\BootVhd\Convert-WindowsImage--tj_line_4092.ps1"
 
 . $ScriptPath
 
