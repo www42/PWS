@@ -18,8 +18,8 @@
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab            = "HDP"
-$LabSwitch      = "HDP"
+#$Lab            = "HDP"
+#$LabSwitch      = "HDP"
 $VmComputerName = "SVR1"
 $IfAlias        = "Ethernet"
 $IpAddress      = "10.80.0.21"
@@ -30,13 +30,13 @@ $AdDomain       = "Adatum.com"
 
 # en-US
 # -----------
-#$Ws2016Iso      = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
-#$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
+$Ws2016Iso      = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
+$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
 
 # de-DE
 # -----------
-$Ws2016Iso      = "C:\iso\14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_DE-DE.ISO"
-$Ws2016IsoLabel = "SSS_X64FREE_DE-DE_DV9"
+#$Ws2016Iso      = "C:\iso\14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_DE-DE.ISO"
+#$Ws2016IsoLabel = "SSS_X64FREE_DE-DE_DV9"
 
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
@@ -63,8 +63,9 @@ Write-Host -ForegroundColor DarkCyan "Create VM.................................
 #region Rename and IP configuration
 
 Invoke-Command -VMName $VmName -Credential $LocalCred {
-    New-NetIPAddress -InterfaceAlias $Using:IfAlias -IPAddress $Using:IpAddress -PrefixLength $Using:PrefixLength -DefaultGateway $Using:DefaultGw | Out-Null
-    Set-DnsClientServerAddress -InterfaceAlias $Using:IfAlias -ServerAddresses $Using:DnsServer  | Out-Null
+    $IfAlias = (Get-NetAdapter).InterfaceAlias
+    New-NetIPAddress -InterfaceAlias $IfAlias -IPAddress $Using:IpAddress -PrefixLength $Using:PrefixLength -DefaultGateway $Using:DefaultGw | Out-Null
+    Set-DnsClientServerAddress -InterfaceAlias $IfAlias -ServerAddresses $Using:DnsServer  | Out-Null
     Rename-Computer -NewName $Using:VmComputerName -Restart
     }
 
@@ -128,6 +129,7 @@ Invoke-Command -VMName $VmName -Credential $DomCred {
     }
 
 Set-VMDvdDrive -VMName $VmName -Path $null
+Remove-VMDvdDrive -VMName $VmName -ControllerNumber 0 -ControllerLocation 1
 
 Write-Host -ForegroundColor DarkCyan "Create Nano Workbench........................ done."
 

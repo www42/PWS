@@ -14,10 +14,9 @@
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab             = "HDP"
-$LabSwitch       = "HDP"
+#$Lab             = "HDP"
+#$LabSwitch       = "HDP"
 $VmComputerName  = "DC1"
-$IfAlias         = "Ethernet"
 $IpAddress       = "10.80.0.10"
 $PrefixLength    = "16"
 $DefaultGw       = "10.80.0.1"
@@ -50,7 +49,8 @@ Write-Host -ForegroundColor DarkCyan "Create VM.................................
 #region Rename and configure static IP address
 
 Invoke-Command -VMName $VmName -Credential $LocalCred {
-    New-NetIPAddress -InterfaceAlias $Using:IfAlias -IPAddress $Using:IpAddress -PrefixLength $Using:PrefixLength -DefaultGateway $Using:DefaultGw | Out-Null
+    $IfAlias = (Get-NetAdapter).InterfaceAlias
+    New-NetIPAddress -InterfaceAlias $IfAlias -IPAddress $Using:IpAddress -PrefixLength $Using:PrefixLength -DefaultGateway $Using:DefaultGw | Out-Null
     Rename-Computer -NewName $Using:VmComputerName -Restart
     }
 
@@ -152,8 +152,9 @@ Write-Host -ForegroundColor DarkCyan "Disable IE Enhanced Security Configuration
 #region Ensure FW Domain Profile
 
 Invoke-Command -VMName $VmName -Credential $DomCred {
-    Disable-NetAdapter -Name Ethernet -Confirm:$false
-    Enable-NetAdapter -Name Ethernet
+    $NetAdapterName = (Get-NetAdapter).Name
+    Disable-NetAdapter -Name $NetAdapterName -Confirm:$false
+    Enable-NetAdapter -Name $NetAdapterName
     Start-Sleep -Seconds 10
 }
 

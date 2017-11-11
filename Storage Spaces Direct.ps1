@@ -11,9 +11,9 @@ $DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Admini
 
 #region Zusätzliche Platten für die Nodes
 
-Remove-VMDvdDrive -VMName HDP-SVR1 -ControllerNumber 0 -ControllerLocation 1
+Remove-VMDvdDrive -VMName BBV-SVR1 -ControllerNumber 0 -ControllerLocation 1
 
-foreach ($NodeName in "HDP-SVR1","HDP-SVR2")
+foreach ($NodeName in "BBV-SVR1","BBV-SVR2")
 {
   $Disk1 = "$LabDir\$NodeName\Virtual Hard Disks\Disk1.vhdx"
   $Disk2 = "$LabDir\$NodeName\Virtual Hard Disks\Disk2.vhdx"
@@ -39,9 +39,9 @@ Start-VM -Name $VmNameSVR1,$VmNameSVR2
 #endregion
 
 #region Sessions
-$DC1   = New-PSSession -VMName HDP-DC1  -Credential $DomCred 
-$SVR1  = New-PSSession -VMName HDP-SVR1 -Credential $DomCred
-$SVR2  = New-PSSession -VMName HDP-SVR2 -Credential $DomCred
+$DC1   = New-PSSession -VMName BBV-DC1  -Credential $DomCred 
+$SVR1  = New-PSSession -VMName BBV-SVR1 -Credential $DomCred
+$SVR2  = New-PSSession -VMName BBV-SVR2 -Credential $DomCred
 #endregion
 
 #region Create Cluster
@@ -120,7 +120,7 @@ Invoke-Command -Session $SVR1 {
 
 #region Zusätzliche Platten löschen
 
-foreach ($NodeName in "HDP-SVR1","HDP-SVR2")
+foreach ($NodeName in "BBV-SVR1","BBV-SVR2")
 {
   $Disk1 = "$LabDir\$NodeName\Virtual Hard Disks\Disk1.vhdx"
   $Disk2 = "$LabDir\$NodeName\Virtual Hard Disks\Disk2.vhdx"

@@ -1,8 +1,8 @@
-﻿$VmName          = "HDP-R1"
-$Dir             = "C:\Labs\HDP"
-$Switch_Private  = "HDP"
+﻿$VmName          = "BBV-R1"
+$Dir             = "D:\Labs\BBV"
+$Switch_Private  = "BBV"
 $Switch_External = "External Network"
-$VyosTemplate    = "C:\Base\vyos-999.201703132237-amd64.vhd"
+$VyosTemplate    = "D:\Base\vyos-999.201703132237-amd64.vhd"
 
 $VmDir   = Join-Path $Dir $VmName
 $VhdDir  = Join-Path $VmDir  "Virtual Hard Disks"

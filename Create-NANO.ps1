@@ -19,14 +19,14 @@
 
 #endregion
 
-[string]$NanoComputerName   = "NANO3"
-[string]$NanoIPv4Address    = "10.70.17.3"
+[string]$NanoComputerName   = "NANO1"
+[string]$NanoIPv4Address    = "10.80.17.1"
 
 #region Variables
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab = "PWS"
+#$Lab = "PWS"
 $ServerComputerName = "SVR1"
 $serverVmName = ConvertTo-VmName -VmComputerName $ServerComputerName -Lab $Lab
 
@@ -51,8 +51,8 @@ Write-Host -ForegroundColor DarkCyan "Variables.................................
 [string]$NanoUnattendPath   = "$NanoRootPath\TimeZone.xml"
 [string]$NanoInterface      = "Ethernet"
 [string]$NanoIpv4SubnetMask = "255.255.0.0"
-[string]$NanoIpv4Gateway    = "10.70.0.1"
-[string]$NanoIpv4Dns        = "10.70.0.10"
+[string]$NanoIpv4Gateway    = "10.80.0.1"
+[string]$NanoIpv4Dns        = "10.80.0.10"
 [string]$NanoDomainName     = "Adatum.com"
 [long]  $NanoMem            = 2GB
 [long]  $NanoProcessorCount = 2

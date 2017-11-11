@@ -13,8 +13,8 @@
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-$Lab            = "HDP"
-$LabSwitch      = "HDP"
+#$Lab            = "HDP"
+#$LabSwitch      = "HDP"
 $VmComputerName = "SVR3"
 $IfAlias        = "Ethernet"
 $IpAddress      = "10.80.0.23"
