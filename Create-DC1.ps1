@@ -1,5 +1,4 @@
-﻿
-#region Description
+﻿#region Description
 
 #  DC1 = First Domain Controller in Adatum.com
 
@@ -14,9 +13,10 @@
 
 # To use local variable <var> in a remote session use $Using:<var>
 
-#$Lab             = "HDP"
-#$LabSwitch       = "HDP"
+$Lab             = "ROC"
+$LabSwitch       = "ROC"
 $VmComputerName  = "DC1"
+$IfAlias         = "Ethernet"
 $IpAddress       = "10.80.0.10"
 $PrefixLength    = "16"
 $DefaultGw       = "10.80.0.1"
@@ -26,8 +26,8 @@ $AdDomainNetBios = "ADATUM"
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 
-$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
-$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
+$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa55w.rd' -AsPlainText -Force)
+$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa55w.rd' -AsPlainText -Force)
 
 Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
@@ -36,7 +36,7 @@ Write-Host -ForegroundColor DarkCyan "Variables.................................
 #region Create VM
 
 #Import-Module -Name tjLabs
-New-LabVmGen2Differencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
+New-LabVmDifferencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
 Start-LabVm -VmComputerName $VmComputerName
 
 # Wait for specialize and oobe
@@ -49,8 +49,7 @@ Write-Host -ForegroundColor DarkCyan "Create VM.................................
 #region Rename and configure static IP address
 
 Invoke-Command -VMName $VmName -Credential $LocalCred {
-    $IfAlias = (Get-NetAdapter).InterfaceAlias
-    New-NetIPAddress -InterfaceAlias $IfAlias -IPAddress $Using:IpAddress -PrefixLength $Using:PrefixLength -DefaultGateway $Using:DefaultGw | Out-Null
+    New-NetIPAddress -InterfaceAlias $Using:IfAlias -IPAddress $Using:IpAddress -PrefixLength $Using:PrefixLength -DefaultGateway $Using:DefaultGw | Out-Null
     Rename-Computer -NewName $Using:VmComputerName -Restart
     }
 
@@ -65,7 +64,7 @@ Write-Host -ForegroundColor DarkCyan "Rename and configure static IP address....
 
 Invoke-Command -VMName $VmName -Credential $LocalCred {
 
-    $SecureModePW=ConvertTo-SecureString -String 'Pa$$w0rd' -AsPlainText -Force
+    $SecureModePW=ConvertTo-SecureString -String 'Pa55w.rd' -AsPlainText -Force
 
     Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools | Out-Null
 
@@ -152,9 +151,8 @@ Write-Host -ForegroundColor DarkCyan "Disable IE Enhanced Security Configuration
 #region Ensure FW Domain Profile
 
 Invoke-Command -VMName $VmName -Credential $DomCred {
-    $NetAdapterName = (Get-NetAdapter).Name
-    Disable-NetAdapter -Name $NetAdapterName -Confirm:$false
-    Enable-NetAdapter -Name $NetAdapterName
+    Disable-NetAdapter -Name Ethernet -Confirm:$false
+    Enable-NetAdapter -Name Ethernet
     Start-Sleep -Seconds 10
 }
 
