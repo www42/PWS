@@ -1,38 +1,42 @@
-﻿#region Description
+﻿#Requires -RunAsAdministrator
+#Requires -Modules @{ModuleName="tjLabs";ModuleVersion="0.2.6.10"}
+
+#region Description
 
   # NVHOST3
   # Server with Desktop Experience
-  # Static IP address 10.70.0.33 /16
+  # Static IP address x.x.0.33 /16
   # Member domain Adatum.com
 
-  # Nested Virtualization
+  # Hyper-V Host (Nested Virtualization)
 
 #endregion
 
 #region Variables
 
 # To use local variable <var> in a remote session use $Using:<var>
+# $Lab* are set in profile
 
-$Lab            = "PWS"
-$LabSwitch      = "PWS"
 $VmComputerName = "NVHOST3"
 $IfAlias        = "Ethernet"
-$IpAddress      = "10.70.0.33"
+$IpAddress      = "10.80.0.33"
 $PrefixLength   = "16"
-$DefaultGw      = "10.70.0.1"
-$DnsServer      = "10.70.0.10"
+$DefaultGw      = "10.80.0.1"
+$DnsServer      = "10.80.0.10"
 $AdDomain       = "Adatum.com"
+$PwLocal         = 'Pa55w.rd'
+$PwDomain        = 'Pa55w.rd'
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 
-$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
-$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
+$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString $PwLocal -AsPlainText -Force)
+$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString $PwDomain -AsPlainText -Force)
 
 #endregion
 
 #region Create VM
 
-New-LabVmGen2Differencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
+New-LabVmDifferencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
 Start-LabVm -VmComputerName $VmComputerName
 
 # Wait for specialize and oobe to complete
@@ -56,17 +60,10 @@ Start-Sleep -Seconds 60
 #region Join Domain
 
 Invoke-Command -VMName $VmName -Credential $LocalCred {
-
     Add-Computer -DomainName $Using:AdDomain -Credential $Using:DomCred -Restart
-    
     }
 
 #endregion
-
-# --------------------------------------------------------
-# Achtung! NVHOST3 wurde wieder aus der Domäne entfernt!
-# (Damit man die die VM besser kopieren kann.)
-# --------------------------------------------------------
 
 #region Preparing for Nested Virtualization
 
