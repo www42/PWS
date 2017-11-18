@@ -1,8 +1,10 @@
-﻿
+﻿#Requires -RunAsAdministrator
+#Requires -Modules @{ModuleName="tjLabs";ModuleVersion="0.2.6.10"}
+
 #region Description
 
-
   # SVR2
+
   # Server with Desktop Experience
   # Static IP address x.x.0.22 /16
   # Member domain Adatum.com
@@ -12,21 +14,22 @@
 #region Variables
 
 # To use local variable <var> in a remote session use $Using:<var>
+# $Lab* are set in profile
 
-#$Lab            = "HDP"
-#$LabSwitch      = "HDP"
-$VmComputerName = "SVR2"
-$IfAlias        = "Ethernet"
-$IpAddress      = "10.80.0.22"
-$PrefixLength   = "16"
-$DefaultGw      = "10.80.0.1"
-$DnsServer      = "10.80.0.10"
-$AdDomain       = "Adatum.com"
+$VmComputerName  = "SVR2"
+$IfAlias         = "Ethernet"
+$IpAddress       = "10.80.0.22"
+$PrefixLength    = "16"
+$DefaultGw       = "10.80.0.1"
+$DnsServer       = "10.80.0.10"
+$AdDomain        = "Adatum.com"
+$PwLocal         = 'Pa55w.rd'
+$PwDomain        = 'Pa55w.rd'
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 
-$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
-$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa$$w0rd' -AsPlainText -Force)
+$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString $PwLocal -AsPlainText -Force)
+$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString $PwDomain -AsPlainText -Force)
 
 Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
@@ -34,7 +37,7 @@ Write-Host -ForegroundColor DarkCyan "Variables.................................
 
 #region Create VM
 
-New-LabVmGen2Differencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
+New-LabVmDifferencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
 Start-LabVm -VmComputerName $VmComputerName
 
 # Wait for specialize and oobe to complete

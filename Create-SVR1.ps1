@@ -1,47 +1,35 @@
-﻿#region Description
+﻿#Requires -RunAsAdministrator
+#Requires -Modules @{ModuleName="tjLabs";ModuleVersion="0.2.6.10"}
 
+#region Description
 
   # SVR1
+
   # Server with Desktop Experience
   # Static IP address x.x.0.21 /16
   # Member domain Adatum.com
-  # 
-  # Nano Server Deployment Workbench
-  #   d.h. es ist alles vorhanden was man braucht, um Nano Images zu deployen
-  #   C:\Nano_Workbench
-
 
 #endregion
 
 #region Variables
 
 # To use local variable <var> in a remote session use $Using:<var>
+# $Lab* are set in profile
 
-$Lab            = "ROC"
-$LabSwitch      = "ROC"
-$VmComputerName = "SVR1"
-$IfAlias        = "Ethernet"
-$IpAddress      = "10.80.0.21"
-$PrefixLength   = "16"
-$DefaultGw      = "10.80.0.1"
-$DnsServer      = "10.80.0.10"
-$AdDomain       = "Adatum.com"
-
-# en-US
-# -----------
-#$Ws2016Iso      = "D:\iso\14393.0.160715-1616.RS1_RELEASE_SERVER_EVAL_X64FRE_EN-US.ISO"
-#$Ws2016IsoLabel = "SSS_X64FREE_EN-US_DV9"
-
-# de-DE
-# -----------
-$Ws2016Iso      = "C:\iso\14393.0.161119-1705.RS1_REFRESH_SERVER_EVAL_X64FRE_DE-DE.ISO"
-$Ws2016IsoLabel = "SSS_X64FREE_DE-DE_DV9"
-
+$VmComputerName  = "SVR1"
+$IfAlias         = "Ethernet"
+$IpAddress       = "10.80.0.21"
+$PrefixLength    = "16"
+$DefaultGw       = "10.80.0.1"
+$DnsServer       = "10.80.0.10"
+$AdDomain        = "Adatum.com"
+$PwLocal         = 'Pa55w.rd'
+$PwDomain        = 'Pa55w.rd'
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 
-$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa55w.rd' -AsPlainText -Force)
-$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa55w.rd' -AsPlainText -Force)
+$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString $PwLocal -AsPlainText -Force)
+$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString $PwDomain -AsPlainText -Force)
 
 Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
@@ -83,51 +71,5 @@ Invoke-Command -VMName $VmName -Credential $LocalCred {
 
 Start-Sleep -Seconds 60
 Write-Host -ForegroundColor DarkCyan "Join Domain.................................. done."
-
-#endregion
-
-#region Create Nano Workbench
-
-$DvdLw = Get-VMDvdDrive -VMName $VmName
-if (-not $DvdLw) {Add-VMDvdDrive -VMName $VmName}
-
-Set-VMDvdDrive -VMName $VmName -Path $Ws2016Iso
-
-Invoke-Command -VMName $VmName -Credential $DomCred {
-
-    $DvdVolume = (Get-Volume -FileSystemLabel $Using:Ws2016IsoLabel | % DriveLetter) + ':'
-    
-    mkdir C:\Nano_WorkBench | Out-Null
-    cp $DvdVolume\NanoServer\NanoServerImageGenerator\*  C:\Nano_WorkBench
-
-    # Einmalig ein Nano Image erzeugen, damit vom MediaPath alles kopiert wird. Das hat den Vorteil, dass man später keinen MediaPath angeben muss.
-    Import-Module -Name C:\Nano_WorkBench\NanoServerImageGenerator.psd1
-    New-NanoServerImage `
-        -DeploymentType        Guest `
-        -Edition               Datacenter `
-        -BasePath              "C:\Nano_WorkBench\Base" `
-        -TargetPath            "C:\Nano_WorkBench\Target\Test.vhdx" `
-        -MediaPath             $DvdVolume `
-        -ComputerName          "Test" `
-        -AdministratorPassword (ConvertTo-SecureString -String 'Pa$$w0rd' -AsPlainText -Force) | Out-Null
-   
-    del C:\Nano_WorkBench\Target\Test.vhdx
-
-    # unattend file TimeZone.xml
-    $UnattendFile = "C:\Nano_WorkBench\TimeZone.xml"
-    New-Item -ItemType File -Path $UnattendFile | Out-Null
-    Add-Content -Path $UnattendFile -Value '<?xml version=''1.0'' encoding=''utf-8''?>'
-    Add-Content -Path $UnattendFile -Value '<unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-    Add-Content -Path $UnattendFile -Value '  <settings pass="specialize">'
-    Add-Content -Path $UnattendFile -Value '    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">'
-    Add-Content -Path $UnattendFile -Value '      <TimeZone>W. Europe Standard Time</TimeZone>'
-    Add-Content -Path $UnattendFile -Value '    </component>'
-    Add-Content -Path $UnattendFile -Value '  </settings>'
-    Add-Content -Path $UnattendFile -Value '</unattend>'
-    }
-
-Set-VMDvdDrive -VMName $VmName -Path $null
-
-Write-Host -ForegroundColor DarkCyan "Create Nano Workbench........................ done."
 
 #endregion

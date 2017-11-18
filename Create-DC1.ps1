@@ -1,4 +1,7 @@
-﻿#region Description
+﻿#Requires -RunAsAdministrator
+#Requires -Modules @{ModuleName="tjLabs";ModuleVersion="0.2.6.10"}
+
+#region Description
 
 #  DC1 = First Domain Controller in Adatum.com
 
@@ -12,9 +15,8 @@
 #region Variables
 
 # To use local variable <var> in a remote session use $Using:<var>
+# $Lab* are set in profile
 
-$Lab             = "ROC"
-$LabSwitch       = "ROC"
 $VmComputerName  = "DC1"
 $IfAlias         = "Ethernet"
 $IpAddress       = "10.80.0.10"
@@ -23,11 +25,13 @@ $DefaultGw       = "10.80.0.1"
 $DnsServer       = "10.80.0.10"
 $AdDomain        = "Adatum.com"
 $AdDomainNetBios = "ADATUM"
+$PwLocal         = 'Pa55w.rd'
+$PwDomain        = 'Pa55w.rd'
 
 $VmName = ConvertTo-VmName -VmComputerName $VmComputerName -Lab $Lab
 
-$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString 'Pa55w.rd' -AsPlainText -Force)
-$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString 'Pa55w.rd' -AsPlainText -Force)
+$LocalCred = New-Object System.Management.Automation.PSCredential        "Administrator",(ConvertTo-SecureString $PwLocal -AsPlainText -Force)
+$DomCred   = New-Object System.Management.Automation.PSCredential "Adatum\Administrator",(ConvertTo-SecureString $PwDomain -AsPlainText -Force)
 
 Write-Host -ForegroundColor DarkCyan "Variables.................................... done."
 
@@ -35,7 +39,6 @@ Write-Host -ForegroundColor DarkCyan "Variables.................................
 
 #region Create VM
 
-#Import-Module -Name tjLabs
 New-LabVmDifferencing -VmComputerName $VmComputerName -Lab $Lab -Switch $LabSwitch
 Start-LabVm -VmComputerName $VmComputerName
 
@@ -64,7 +67,7 @@ Write-Host -ForegroundColor DarkCyan "Rename and configure static IP address....
 
 Invoke-Command -VMName $VmName -Credential $LocalCred {
 
-    $SecureModePW=ConvertTo-SecureString -String 'Pa55w.rd' -AsPlainText -Force
+    $SecureModePW=ConvertTo-SecureString -String $using:PwLocal -AsPlainText -Force
 
     Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools | Out-Null
 
